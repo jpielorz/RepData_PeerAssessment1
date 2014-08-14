@@ -1,17 +1,76 @@
 # Reproducible Research: Peer Assessment 1
 
+This assignment makes use of data from a personal activity monitoring device. This device collects data at 5 minute intervals throughout the day. The data consists of two months of data from an anonymous individual collected during the months of October and November, 2012 and includs the number of steps taken in 5 minute intervals each day.
+
+
+The variables included in this dataset are:
+
+* steps: Number of steps taking in a 5-minute interval (missing values are coded as NA)
+
+* date: The date on which the measurement was taken in YYYY-MM-DD format
+
+* interval: Identifier for the 5-minute interval in which measurement was taken
+
+The dataset is stored in a comma-separated-value (CSV) file and there are a total of 17,568 observations.
 
 ## Loading and preprocessing the data
 
+Set working directory to correct GitHub repo and create a temporary directory for unzipping and extracting the .zip
+
+```{r}
+  setwd("~//GitHub/RepData_PeerAssessment1//")
+  tdir <- tempdir()
+```
+
+Get the name of the first file in the zip archive and extract it
+
+```{r}
+  flist <- unzip("activity.zip", list=T)
+  fname <- flist$Name
+  unzip("activity.zip", files = fname, exdir = tdir, overwrite =T)
+```
+
+Get full path to extracted file and load .csv file into dataframe.
+
+```{r}
+  fpath <- file.path(tdir,fname)
+  activityData <- read.csv(fpath, header = T)
+```
+
+Convert date column into date type and transform interval column into equally spaced intervals.
+
+```{r}
+  activityData$date <- as.Date(activityData$date)
+  interval <- seq(0,1435, by=5)
+  activityData$interval <- rep.int(interval,61)
+```
 
 
-## What is mean total number of steps taken per day?
+## What is the mean total number of steps taken per day?
 
+Calculate the total number of steps per day, plot a histogram and calculate and report the mean and medium steps per day.
+
+
+```{r}
+  totStepsDay <- aggregate(activityData$steps, list(date = activityData$date), sum)
+  hist(totStepsDay$x)
+  mean(totStepsDay$x, na.rm = T)
+  median(totStepsDay$x, na.rm = T)
+```
+
+Alternatively, a barplot
+
+```{r}
+  barplot(totStepsDay$x, names.arg = totStepsDay$date, border="blue")
+```
 
 
 ## What is the average daily activity pattern?
 
-
+```{r}
+  totStepsInt <- aggregate(activityData$steps, list(Interval = activityData$interval), mean, na.rm = T)
+  plot(totStepsInt, type="l")
+```
 
 ## Imputing missing values
 
